@@ -1,4 +1,4 @@
-#docker-nongnu
+# docker-nognu
 
 This is a Docker image for building a toolchain that is devoid of
 any GNU (or GPL, for that matter) software.
