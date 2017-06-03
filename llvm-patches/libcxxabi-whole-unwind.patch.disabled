@@ -1,0 +1,16 @@
+diff --git a/projects/libcxxabi/src/CMakeLists.txt b/projects/libcxxabi/src/CMakeLists.txt
+index efbea67..f08c379 100644
+--- a/projects/libcxxabi/src/CMakeLists.txt
++++ b/projects/libcxxabi/src/CMakeLists.txt
+@@ -64,9 +64,9 @@ if (LIBCXXABI_USE_LLVM_UNWINDER)
+   if (TARGET unwind_shared)
+     list(APPEND libraries unwind_shared)
+   elseif(TARGET unwind_static)
+-    list(APPEND libraries unwind_static)
++    list(APPEND libraries "-Wl,--whole-archive -lunwind -Wl,--no-whole-archive")
+   else()
+-    list(APPEND libraries unwind)
++    list(APPEND libraries "-Wl,--whole-archive -lunwind -Wl,--no-whole-archive")
+   endif()
+ else()
+   append_if(libraries LIBCXXABI_HAS_GCC_S_LIB gcc_s)

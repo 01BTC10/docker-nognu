@@ -1,0 +1,75 @@
+diff --git a/tools/lldb/include/lldb/Host/Editline.h b/tools/lldb/include/lldb/Host/Editline.h
+index faed373..559bd0b 100644
+--- a/tools/lldb/include/lldb/Host/Editline.h
++++ b/tools/lldb/include/lldb/Host/Editline.h
+@@ -81,8 +81,14 @@ using EditLineStringStreamType = std::stringstream;
+ using EditLineCharType = char;
+ #endif
+ 
++#ifdef EL_CLIENTDATA	/* editline with wide support + wide char read function */
++using EditLineGetCharType = wchar_t;
++#else
++using EditLineGetCharType = char;
++#endif
++
+ typedef int (*EditlineGetCharCallbackType)(::EditLine *editline,
+-                                           EditLineCharType *c);
++                                           EditLineGetCharType *c);
+ typedef unsigned char (*EditlineCommandCallbackType)(::EditLine *editline,
+                                                      int ch);
+ typedef const char *(*EditlinePromptCallbackType)(::EditLine *editline);
+@@ -269,7 +275,7 @@ private:
+ 
+   /// Character reading implementation for EditLine that supports our multi-line
+   /// editing trickery.
+-  int GetCharacter(EditLineCharType *c);
++  int GetCharacter(EditLineGetCharType *c);
+ 
+   /// Prompt implementation for EditLine.
+   const char *Prompt();
+@@ -322,7 +328,7 @@ private:
+   /// single or multi-line editing.
+   void ConfigureEditor(bool multiline);
+ 
+-  bool CompleteCharacter(char ch, EditLineCharType &out);
++  bool CompleteCharacter(char ch, EditLineGetCharType &out);
+ 
+ private:
+ #if LLDB_EDITLINE_USE_WCHAR
+diff --git a/tools/lldb/source/Host/common/Editline.cpp b/tools/lldb/source/Host/common/Editline.cpp
+index 1c5c0ff..a27869d 100644
+--- a/tools/lldb/source/Host/common/Editline.cpp
++++ b/tools/lldb/source/Host/common/Editline.cpp
+@@ -473,7 +473,7 @@ unsigned char Editline::RecallHistory(bool earlier) {
+   return CC_NEWLINE;
+ }
+ 
+-int Editline::GetCharacter(EditLineCharType *c) {
++int Editline::GetCharacter(EditLineGetCharType *c) {
+   const LineInfoW *info = el_wline(m_editline);
+ 
+   // Paint a faint version of the desired prompt over the version libedit draws
+@@ -968,7 +968,7 @@ void Editline::ConfigureEditor(bool multiline) {
+          }));
+ 
+   el_wset(m_editline, EL_GETCFN, (EditlineGetCharCallbackType)([](
+-                                     EditLine *editline, EditLineCharType *c) {
++                                     EditLine *editline, EditLineGetCharType *c) {
+             return Editline::InstanceFor(editline)->GetCharacter(c);
+           }));
+ 
+@@ -1359,12 +1359,12 @@ void Editline::PrintAsync(Stream *stream, const char *s, size_t len) {
+   }
+ }
+ 
+-bool Editline::CompleteCharacter(char ch, EditLineCharType &out) {
++bool Editline::CompleteCharacter(char ch, EditLineGetCharType &out) {
+ #if !LLDB_EDITLINE_USE_WCHAR
+   if (ch == (char)EOF)
+     return false;
+ 
+-  out = ch;
++  out = (unsigned char)ch;
+   return true;
+ #else
+   std::codecvt_utf8<wchar_t> cvt;

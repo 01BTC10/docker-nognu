@@ -1,0 +1,27 @@
+diff --git a/tools/lld/ELF/DriverUtils.cpp b/tools/lld/ELF/DriverUtils.cpp
+index 3a20cd7..1352fe3 100644
+--- a/tools/lld/ELF/DriverUtils.cpp
++++ b/tools/lld/ELF/DriverUtils.cpp
+@@ -120,6 +120,9 @@ opt::InputArgList ELFOptTable::parse(ArrayRef<const char *> Argv) {
+ void elf::printHelp(const char *Argv0) {
+   ELFOptTable Table;
+   Table.PrintHelp(outs(), Argv0, "lld", false);
++  // hack to make libtool happy
++  // see http://lists.llvm.org/pipermail/llvm-commits/Week-of-Mon-20161212/411904.html
++  outs() << Argv0 << ": supported targets: elf\n";
+ }
+ 
+ // Reconstructs command line arguments so that so that you can re-run
+diff --git a/tools/lld/lib/Config/Version.cpp b/tools/lld/lib/Config/Version.cpp
+index 2554475..2b694bb 100644
+--- a/tools/lld/lib/Config/Version.cpp
++++ b/tools/lld/lib/Config/Version.cpp
+@@ -38,6 +38,7 @@ static std::string getRepository() {
+ }
+ 
+ // Returns a version string, e.g., "LLD 4.0 (lld/trunk 284614)".
++// hack to make libtool happy
+ std::string lld::getLLDVersion() {
+-  return "LLD " + std::string(LLD_VERSION_STRING) + getRepository();
++  return "LLD (not GNU)" + std::string(LLD_VERSION_STRING) + getRepository();
+ }

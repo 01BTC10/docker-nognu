@@ -1,0 +1,17 @@
+diff --git a/tools/clang/lib/Driver/Tools.cpp b/tools/clang/lib/Driver/Tools.cpp
+index 3c3d453..8d4a540 100644
+--- a/tools/clang/lib/Driver/Tools.cpp
++++ b/tools/clang/lib/Driver/Tools.cpp
+@@ -724,6 +724,12 @@ void Clang::AddPreprocessingOptions(Compilation &C, const JobAction &JA,
+   // OBJCPLUS_INCLUDE_PATH - system includes enabled when compiling ObjC++.
+   addDirectoryList(Args, CmdArgs, "-objcxx-isystem", "OBJCPLUS_INCLUDE_PATH");
+ 
++  // set isystem to relative include directory
++  if (!Args.hasArg(options::OPT_nostdlibinc)) {
++    CmdArgs.push_back("-internal-isystem");
++    CmdArgs.push_back(Args.MakeArgString(D.Dir + "/../include"));
++  }
++
+   // While adding the include arguments, we also attempt to retrieve the
+   // arguments of related offloading toolchains or arguments that are specific
+   // of an offloading programming model.
